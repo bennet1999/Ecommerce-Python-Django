@@ -43,7 +43,7 @@
                     <form action="{% url 'admin_login' %}" method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <input class="form-control" name="username" placeholder="Username" type="text">
+                            <input class="form-control" name="email" placeholder="Email" type="text">
                         </div> <!-- form-group// -->
                         <div class="mb-3">
                             <input class="form-control" name="password" placeholder="Password" type="password">

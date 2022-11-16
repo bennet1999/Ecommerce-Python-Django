@@ -85,3 +85,9 @@ class Address(models.Model):
 
     def __unicode__(self):
         return self.firstname
+
+
+class Profile(models.Model):
+    user=models.OneToOneField(Account,on_delete=models.CASCADE,related_name="profile")
+    phone_number=models.CharField(max_length=15)
+    otp=models.CharField(max_length=100,null=True,blank=True)

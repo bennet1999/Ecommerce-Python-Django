@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!in$g(++sfm(g&9qk)&k@6*f2r1@dxvqdg)d!ufobkxg3ofq2o'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'homepage',
     'adminApp',
-    'userProfile'
+    'userProfile',
+    'category',
+    'product'
 ]
 
 MIDDLEWARE = [
@@ -105,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+AUTH_USER_MODEL = 'userProfile.Account'
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -116,6 +121,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -129,3 +137,9 @@ STATICFILES_DIRS = (
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+ACCOUNT_SID=config('ACCOUNT_SID')
+AUTH_TOKEN=config('AUTH_TOKEN')
+COUNTRY_CODE='+91'
+TWILIO_PHONE_NUMBER=config('TWILIO_PHONE_NUMBER')
