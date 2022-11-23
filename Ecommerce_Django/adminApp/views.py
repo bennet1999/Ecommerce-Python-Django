@@ -44,8 +44,8 @@ def admin_dashboard(request):
 @login_required
 def admin_user_list(request):
     obj = Account.objects.filter(is_superuser=False, is_staff=False).order_by('id')
-    context = {'obj':obj}
-    #currentuser = request.user
+    currentuser = request.user
+    context = {'obj':obj,'currentuser':currentuser}
     return render(request, 'admin/admin_user_list.html', context)
 
 @login_required
@@ -67,8 +67,9 @@ def block_unblock_user(request,id):
 
 @login_required
 def admin_product_list(request):
+    currentuser = request.user
     products = Product.objects.order_by('-created_date')
-    context = {'products':products}
+    context = {'products':products,'currentuser':currentuser}
     return render(request, 'admin/admin-product-list.html', context)
 
 @login_required
@@ -79,10 +80,10 @@ def admin_delete_product(request,id):
 
 @login_required
 def admin_add_product(request):
-
+    currentuser = request.user
     category = Category.objects.all()
     sub_category = Subcategory.objects.all()
-    context = { 'category':category, 'sub_category':sub_category }
+    context = { 'category':category, 'sub_category':sub_category, 'currentuser':currentuser}
 
     if request.method == 'POST':
 
@@ -124,12 +125,13 @@ def admin_add_product(request):
 
 @login_required
 def admin_edit_product(request,id):
+    currentuser = request.user
 
     hcategory = Category.objects.all()
     hsub_category = Subcategory.objects.all()
 
     product = Product.objects.get(id=id)
-    context = {'category':hcategory,'sub_category':hsub_category,'product':product}
+    context = {'category':hcategory,'sub_category':hsub_category,'product':product,'currentuser':currentuser}
 
     if request.method == 'POST':
 
@@ -187,3 +189,151 @@ def admin_edit_product(request,id):
 
     return render(request,'admin/admin-edit-product.html',context)
 
+
+# -----------------------------------------------------------
+# ------------------ CATEGORY  MANAGEMENT -------------------
+# -----------------------------------------------------------
+
+@login_required
+def admin_category_management(request):
+    currentuser = request.user
+
+    category = Category.objects.all()
+    sub_category = Subcategory.objects.all()
+
+    context = { 'category':category,'sub_category':sub_category,'currentuser':currentuser }
+    return render(request,'admin/admin-category-management.html',context)
+
+
+@login_required
+def admin_add_category(request):
+    currentuser = request.user
+    context = {'currentuser':currentuser}
+
+    if request.method == 'POST':
+
+            name = request.POST['name']
+            description = request.POST['description']
+
+            if not Category.objects.filter(name=name).exists():
+
+                category = Category(name=name, description=description)
+                category.save()
+
+                messages.success(request,"Category Added Successfully")
+                return redirect('admin_category_management')
+
+            else:
+                messages.success(request,"Category Name Already Exists")
+                return redirect('admin_add_category')
+                
+
+
+    return render(request, 'admin/admin-add-category.html', context)
+
+
+
+@login_required
+def admin_delete_category(request, id):
+
+    category = Category.objects.get(id=id)
+    category.delete()
+    messages.success(request,"Category Deleted Successfully")
+
+    return redirect('admin_category_management')
+
+
+@login_required
+def admin_add_sub_category(request):
+    currentuser = request.user
+
+    hcategory = Category.objects.all()
+
+    context = {'currentuser':currentuser,'category':hcategory}
+
+    if request.method == 'POST':
+
+            category = request.POST['category']
+            name = request.POST['name']
+
+            if not Subcategory.objects.filter(name=name).exists():
+
+                category_instance = Category.objects.get(name=category)
+
+                sub_category = Subcategory(category=category_instance,name=name)
+                sub_category.save()
+
+                messages.success(request,"Subcategory Added Successfully")
+                return redirect('admin_category_management')
+
+            else:
+                messages.success(request,"Subcategory Name Already Exists")
+                return redirect('admin_add_category')
+                
+
+
+    return render(request, 'admin/admin-add-sub-category.html', context)
+
+
+
+
+@login_required
+def admin_edit_category(request, id):
+
+    currentuser = request.user
+    category = Category.objects.get(id=id)
+    
+    context = {'currentuser':currentuser,'category':category}
+
+    if request.method == 'POST':
+        
+        name = request.POST['name']
+        description = request.POST['description']
+
+        if not Category.objects.filter(name=name).exclude(name=category.name):
+            category.name = name
+            category.description = description
+            category.save()
+            messages.success(request,"Category Edited Successfully")
+            return redirect('admin_category_management')
+        else:
+            messages.success(request,"Category Name Not Available")
+            return redirect('admin_edit_category',category.id)
+
+     
+    return render(request,'admin/admin-edit-category.html',context)
+
+
+@login_required
+def admin_edit_sub_category(request,id):
+
+    currentuser = request.user    
+
+    sub_category = Subcategory.objects.get(id=id)
+
+    context = {'currentuser':currentuser,'sub_category':sub_category}
+
+    if request.method == 'POST':
+        
+        name = request.POST['name']
+
+        if not Subcategory.objects.filter(name=name).exclude(name=sub_category.name):
+            sub_category.name = name
+            sub_category.save()
+            messages.success(request,"Subcategory Edited Successfully")
+            return redirect('admin_category_management')
+        else:
+            messages.success(request,"Subcategory Name Not Available")
+            return redirect('admin_edit_sub_category',sub_category.id)
+
+    return render(request,'admin/admin-edit-sub-category.html',context)
+
+@login_required
+def admin_delete_sub_category(request,id):
+    
+    sub_category = Subcategory.objects.get(id=id)
+    sub_category.delete()
+    
+    messages.success(request,"Subcategory Deleted Successfully")
+    
+    return redirect('admin_category_management')

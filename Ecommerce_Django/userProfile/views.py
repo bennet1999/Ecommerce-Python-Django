@@ -42,7 +42,12 @@ def user_otp_request(request):
             return redirect('user_login')
         else:
             profile1 = Profile.objects.get(phone_number=phone_number)
-            profile1.otp = random.randint(1000,9999)
+            otp = random.randint(1000,9999)
+
+            while(Profile.objects.filter(otp=otp).exists()):
+                otp = random.randint(1000,9999)
+
+            profile.otp = otp
             profile1.save()
             messagehandler = MessageHandler(phone_number, profile1.otp)
             messagehandler.send_otp_via_message()
@@ -52,6 +57,7 @@ def user_otp_request(request):
             context = {'phone_number':profile1.phone_number}            
             
             return render(request,'user/user-otp-login.html',context)
+        
 
 
 def user_otp_login(request):
@@ -64,7 +70,10 @@ def user_otp_login(request):
             messages.info(request, 'Logged in Successfully')
             currentuser = request.user
             return render(request, 'user/user-profile.html', {'currentuser':currentuser})
-    return render(request,'user/user-otp-login.html')
+        else:
+            messages.info(request, 'Invalid OTP')
+            return redirect('user_login')
+    return redirect('user_login')
 
 def user_register(request):
     if 'email' in request.session:

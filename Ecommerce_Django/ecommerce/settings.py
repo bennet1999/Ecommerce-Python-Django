@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'adminApp',
     'userProfile',
     'category',
-    'product'
+    'product',
+    'cart'
 ]
 
 MIDDLEWARE = [
@@ -139,7 +140,7 @@ STATICFILES_DIRS = (
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-ACCOUNT_SID=config('ACCOUNT_SID')
-AUTH_TOKEN=config('AUTH_TOKEN')
+ACCOUNT_SID='AC47f986e3b3305451e64b2ad3bca98165'
+AUTH_TOKEN='6a3518f64062ab57aa140e8be140b028'
 COUNTRY_CODE='+91'
-TWILIO_PHONE_NUMBER=config('TWILIO_PHONE_NUMBER')
+TWILIO_PHONE_NUMBER='+15732943583'

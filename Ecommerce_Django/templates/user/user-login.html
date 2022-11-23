@@ -90,19 +90,19 @@
                                             </div>
                                             <div class="text-muted text-center">Don't have an account?<a href="{% url 'user_register'%}"> Register Now.</a></div>
                                         </form>
-                                        <div>
-                                            {% if messages %}
-                                            <div class="messages text-center">
-                                                {% for message in messages %}
-                                                <p class="{{ message.tags }}">{{ message }}</p>
-                                                {% endfor %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        {% if messages %}
+                        <div class="messages row justify-content-center text-center mt-10">
+                        {% for message in messages %}
+                        <div class="alert alert-info {{ message.tags }} col-6" role="alert">
+                        {{ message }}
+                        </div>
+                        {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -45,7 +45,7 @@
     <main class="main">
         <section class="pt-100 pb-40">
             <div class="container">
-                <div class="row">
+                <div class="row justify-content-center">
                     <div class="col-lg-10 m-auto">
                         <div class="row justify-content-center">
                             <div class="col-lg-5 ">
@@ -57,7 +57,7 @@
                                         <form action="{% url 'user_otp_login'%}" method="post">
                                             {% csrf_token %}
                                             <div class="form-group">
-                                                <input type="text" required="" name="phone_number" value="{{ phone_number }}">
+                                                <input type="text" required="" name="phone_number" value="{{ phone_number }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <input type="text" required="" name="otp" placeholder="OTP Number">
@@ -66,20 +66,22 @@
                                                 <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Verify</button>
                                             </div>
                                         </form>
-                                        <div>
-                                            {% if messages %}
-                                            <div class="messages text-center">
-                                                {% for message in messages %}
-                                                <p class="{{ message.tags }}">{{ message }}</p>
-                                                {% endfor %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-5">
+                    {% if messages %}
+                    <div class="messages row justify-content-center text-center  mt-20">
+                        {% for message in messages %}
+                        <div class="alert alert-info {{ message.tags }} col-6" role="alert">
+                        {{ message }}
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </section>
