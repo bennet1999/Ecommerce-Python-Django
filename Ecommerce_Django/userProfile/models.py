@@ -73,14 +73,15 @@ class Account(AbstractBaseUser):
 
 
 class Address(models.Model):
-    firstname           =   models.CharField(max_length=50 ,null=True)
-    lastname            =   models.CharField(max_length=50 ,null=True)
+    first_name          =   models.CharField(max_length=50 ,null=True)
+    last_name           =   models.CharField(max_length=50 ,null=True)
     phone_number        =   models.CharField(max_length=50 ,null=True)
-    Email_Address       =   models.EmailField(max_length=50 ,null=True)
-    Addressfield        =   models.CharField(max_length=50 ,null=True) 
-    Town                =   models.CharField(max_length=50 ,null=True) 
+    email               =   models.EmailField(max_length=50 ,null=True)
+    address             =   models.CharField(max_length=200 ,null=True) 
+    town                =   models.CharField(max_length=50 ,null=True) 
     state               =   models.CharField(max_length=50 ,null=True) 
     pincode             =   models.CharField(max_length=50 ,null=True)
+    type                =   models.CharField(max_length=20 ,null=True)
     user                =   models.ForeignKey(Account,on_delete=models.CASCADE, null=True) 
 
     def __unicode__(self):

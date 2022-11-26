@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from userProfile.models import Account,Profile
+from userProfile.models import Account, Profile, Address
+from category.models import Category, Subcategory
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .helper import MessageHandler
@@ -12,7 +13,8 @@ import random
 
 def user_login(request):
     if 'email' in request.session:
-        return render(request,'user/user-profile.html')
+        #return redirect('userprofile')
+        return redirect('user_profile')
     else:
         if request.method == 'POST':
             email = request.POST['email']
@@ -24,8 +26,9 @@ def user_login(request):
                 login(request,user)
                 request.session['email'] = email
                 messages.info(request, 'Logged in Successfully')
-                currentuser = request.user
-                return render(request, 'user/user-profile.html', {'currentuser':currentuser})
+                
+                return redirect('user_profile')
+                #return render(request, 'user/user-profile.html')
             else:
                 messages.info(request, 'Invalid Credentials')
                 return redirect('user_login')
@@ -68,8 +71,7 @@ def user_otp_login(request):
         if profile.otp == otp:
             login(request,profile.user)
             messages.info(request, 'Logged in Successfully')
-            currentuser = request.user
-            return render(request, 'user/user-profile.html', {'currentuser':currentuser})
+            return redirect('user_profile')
         else:
             messages.info(request, 'Invalid OTP')
             return redirect('user_login')
@@ -126,5 +128,42 @@ def user_logout(request):
     return redirect('user_login')
 
 @login_required
-def user_profile(request, currentuser):
-    return render(request, 'user/user-profile.html', currentuser)
+def user_profile(request):
+    currentuser = request.user
+    user = Account.objects.get(email=currentuser)
+    addresses = Address.objects.filter(user=user)
+    hcategory = Category.objects.order_by('name')
+    hsub_category = Subcategory.objects.order_by('name')
+    context = {'category':hcategory,'sub_category':hsub_category,'user':user,'addresses':addresses}
+    return render(request, 'user/user-profile.html', context)
+
+
+
+def user_add_address(request):
+    if request.method == 'POST':
+
+            first_name = request.POST['first_name']
+            last_name = request.POST['last_name']
+            phone_number = request.POST['phone_number']
+            email = request.POST['email']
+            address = request.POST['address']
+            town = request.POST['town']
+            state = request.POST['state']
+            pincode = request.POST['pincode']
+            type = request.POST.get('type')
+
+            currentuser = request.user
+            user = Account.objects.get(email=currentuser)
+
+            addressObj = Address.objects.create(first_name=first_name,last_name=last_name,phone_number=phone_number,email=email,address=address,town=town,state=state,pincode=pincode,type=type,user=user)
+            addressObj.save()
+
+            return redirect('user_profile')
+
+
+def user_delete_address(request,id):
+
+    addressObj = Address.objects.get(id=id)
+    addressObj.delete()
+
+    return redirect('user_profile')

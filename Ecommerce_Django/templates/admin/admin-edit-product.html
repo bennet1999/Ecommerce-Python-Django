@@ -34,9 +34,9 @@
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="mb-4">
-                                            <label class="form-label">Stock</label>
+                                            <label class="form-label">Discount Price</label>
                                             <div class="row gx-2">
-                                                <input placeholder="Stock" type="text" name="stock" class="form-control" value={{product.stock}}>
+                                                <input placeholder="Discount Price" type="text" name="discount_price" class="form-control" value={{product.discount_price}}>
                                             </div>
                                         </div>
                                     </div>
@@ -74,44 +74,37 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-3">
                                         <div class="mb-4">
-                                            <label class="form-label">Discount Price</label>
+                                            <label class="form-label">Non Size Stock</label>
                                             <div class="row gx-2">
-                                                <input placeholder="Discount Price" type="text" name="discount_price" class="form-control" value={{product.discount_price}}>
+                                                <input placeholder="Non Size Stock" type="text" name="nonsizestock" class="form-control" value={{product.nonsizestock}}>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-sm-6 mb-3">
-                                        <label class="form-label">Size</label>
-                                        <select class="form-select" name="size">
-                                            <option disabled> - select - </option>
-                                            {% if product.size == "S"%}
-                                            <option selected > S </option>
-                                            {% else %}
-                                            <option > S </option>
-                                            {% endif %}
-                                            {% if product.size == "M"%}
-                                            <option selected > M </option>
-                                            {% else %}
-                                            <option > M </option>
-                                            {% endif %}
-                                            {% if product.size == "L"%}
-                                            <option selected > L </option>
-                                            {% else %}
-                                            <option > L </option>
-                                            {% endif %}
-                                            {% if product.size == "XL"%}
-                                            <option selected > XL </option>
-                                            {% else %}
-                                            <option > XL </option>
-                                            {% endif %}
-                                            {% if product.size == "2XL"%}
-                                            <option selected > 2XL </option>
-                                            {% else %}
-                                            <option > 2XL </option>
-                                            {% endif %}
-                                        </select>
+                                    <div class="col-lg-3">
+                                        <div class="mb-4">
+                                            <label class="form-label">' S ' Size Stock</label>
+                                            <div class="row gx-2">
+                                                <input placeholder="S Size Stock" type="text" name="sizestockS" class="form-control" value={{product.sizestockS}}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="mb-4">
+                                            <label class="form-label">' M ' Size Stock</label>
+                                            <div class="row gx-2">
+                                                <input placeholder="M Size Stock" type="text" name="sizestockM" class="form-control" value={{product.sizestockM}}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="mb-4">
+                                            <label class="form-label">' L ' Size Stock</label>
+                                            <div class="row gx-2">
+                                                <input placeholder="L Size Stock" type="text" name="sizestockL" class="form-control" value={{product.sizestockL}}>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                         </div>

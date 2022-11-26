@@ -17,6 +17,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static "user/assets/imgs/theme/favicon.svg"%}">
     <!-- Template CSS -->
     <link rel="stylesheet" href="{% static "user/assets/css/main.css"%}">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -36,7 +38,7 @@
                                     </a>
                                 </div>
                                 <div class="header-action-icon-2">
-                                    <a class="mini-cart-icon" href="shop-cart.html">
+                                    <a class="mini-cart-icon" href="{% url 'cart_view' %}">
                                         <img alt="Cart" src="{% static "user/assets/imgs/theme/icons/icon-cart.svg"%}">
                                     </a>
                                 </div>
@@ -88,8 +90,8 @@
                                 </a>
                             </div>
                             <div class="header-action-icon-2">
-                                <a class="mini-cart-icon" href="shop-cart.html">
-                                    <img alt="Evara" src="{% static "user/assets/imgs/theme/icons/icon-cart.svg"%}">
+                                <a class="mini-cart-icon" href="{% url 'cart_view' %}">
+                                    <img src="{% static "user/assets/imgs/theme/icons/icon-cart.svg"%}">
                                 </a>
                             </div>
                             <div class="header-action-icon-2">
@@ -261,7 +263,7 @@
         </div>
     </div>
 </footer>
-<!-- Preloader Start -->
+<!-- 
 <div id="preloader-active">
     <div class="preloader d-flex align-items-center justify-content-center">
         <div class="preloader-inner position-relative">
@@ -275,7 +277,9 @@
             </div>
         </div>
     </div>
-</div>
+</div> 
+-->
+
     <script src="{% static "user/assets/js/vendor/modernizr-3.6.0.min.js"%}"></script>
     <script src="{% static "user/assets/js/vendor/jquery-3.6.0.min.js"%}"></script>
     <script src="{% static "user/assets/js/vendor/jquery-migrate-3.3.0.min.js"%}"></script>
@@ -303,6 +307,11 @@
 
     <script src="{% static "user/assets/js/main.js"%}"></script>
     <script src="{% static "user/assets/js/shop.js"%}"></script>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+
     
 </body>
 </html>

@@ -90,7 +90,11 @@ def admin_add_product(request):
             name = request.POST['name']
             description = request.POST['description']
             price = request.POST['price']
-            stock = request.POST['stock']
+
+            nonsizestock = request.POST['nonsizestock']
+            sizestockS = request.POST['sizestockS']
+            sizestockM = request.POST['sizestockM']
+            sizestockL = request.POST['sizestockL']
 
             is_available = request.POST.getlist('is_available')
             is_available = True if is_available==[''] else False
@@ -100,8 +104,6 @@ def admin_add_product(request):
             
             have_size = request.POST.getlist('have_size')
             have_size = True if have_size==[''] else False
-
-            size = request.POST.get('size')
 
             image1 = request.FILES.get('image1')
             image2 = request.FILES.get('image2')
@@ -114,7 +116,7 @@ def admin_add_product(request):
             sub_category = request.POST.get('sub_category')   
             sub_category_instance = Subcategory.objects.get(name=sub_category)
 
-            product = Product(name=name,description=description,price=price,stock=stock,is_available=is_available,is_featured=is_featured,have_size=have_size,size=size,category=category_instance,sub_category=sub_category_instance,image1=image1,image2=image2,image3=image3,image4=image4)
+            product = Product(name=name,description=description,price=price,nonsizestock=nonsizestock,sizestockS=sizestockS,sizestockM=sizestockM,sizestockL=sizestockL,is_available=is_available,is_featured=is_featured,have_size=have_size,category=category_instance,sub_category=sub_category_instance,image1=image1,image2=image2,image3=image3,image4=image4)
             product.save()
         
             messages.success(request,"Product Added Successfully")
@@ -138,7 +140,11 @@ def admin_edit_product(request,id):
             name = request.POST['name']
             description = request.POST['description']
             price = request.POST['price']
-            stock = request.POST['stock']
+            
+            nonsizestock = request.POST['nonsizestock']
+            sizestockS = request.POST['sizestockS']
+            sizestockM = request.POST['sizestockM']
+            sizestockL = request.POST['sizestockL']
 
             is_available = request.POST.getlist('is_available')
             is_available = True if is_available==[''] else False
@@ -148,8 +154,6 @@ def admin_edit_product(request,id):
             
             have_size = request.POST.getlist('have_size')
             have_size = True if have_size==[''] else False
-
-            size = request.POST.get('size')
 
             image1 = request.FILES.get('image1')
             image2 = request.FILES.get('image2')
@@ -165,11 +169,15 @@ def admin_edit_product(request,id):
             product.name = name
             product.description = description
             product.price = price
-            product.stock = stock
+            
+            product.nonsizestock = nonsizestock
+            product.sizestockS = sizestockS
+            product.sizestockM = sizestockM
+            product.sizestockL = sizestockL
+
             product.is_available = is_available
             product.is_featured = is_featured
             product.have_size = have_size
-            product.size = size
             
             if image1 != None:
                 product.image1 = image1

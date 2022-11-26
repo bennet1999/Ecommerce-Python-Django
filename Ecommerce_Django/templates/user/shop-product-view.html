@@ -62,32 +62,36 @@
 
                                             </ul>
                                         </div>
+                                        <form  action="{% url 'add_to_cart' product.id %}" method="post">
+                                        {% csrf_token %}
                                         {% if product.have_size %}
                                         <div class="attr-detail attr-size">
-                                            <strong class="mr-10">Size</strong>
-                                            <ul class="list-filter size-filter font-small">
-                                                <li class="active"><a href="#">S</a></li>
-                                                <li><a href="#">M</a></li>
-                                                <li><a href="#">L</a></li>
-                                                <li><a href="#">XL</a></li>
-                                                <li><a href="#">2XL</a></li>
-                                            </ul>
+                                            <select class="form-select" name="size">
+                                                <option disabled selected> -- select size -- </option>
+                                                    <option>S</option>
+                                                    <option>M</option>
+                                                    <option>L</option>
+                                                </select>
                                         </div>
                                         {% endif %}
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                        <div class="detail-extralink">
+                                        <div class="detail-extralink mb-30">
                                             <div class="detail-qty border radius">
-                                                <a href="#" class="qty-down"><i class="fi-rs-angle-small-down"></i></a>
-                                                <span class="qty-val">1</span>
-                                                <a href="#" class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
+                                                <a class="qty-down"><i class="fi-rs-angle-small-down"></i></a>
+                                                <span class="qty-val" id="spanQuantity">1</span>
+                                                <a class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
+                                                <input id="itemQuantity" type="hidden"  name="quantity"></input>
                                             </div>
+                                            <script>
+                                                function copy(){
+                                                    document.getElementById("itemQuantity").value = document.getElementById("spanQuantity").innerHTML;
+                                                }
+                                            </script>
                                             <div class="product-extra-link2">
-                                                <button type="submit" class="button button-add-to-cart">Add to
-                                                    cart</button>
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                    href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                <button onclick="copy()" type="submit" class="button button-add-to-cart">Add to cart</button>
                                             </div>
                                         </div>
+                                        </form>
                                         <ul class="product-meta font-xs color-grey mt-0">
                                             <li>Availability:<span class="in-stock text-success ml-5">{{product.stock}} Items In
                                                     Stock</span></li>
@@ -104,5 +108,33 @@
             </div>
         </section>
     </main>
+    <style>
+        #id_work_days{
+            height: 40px;
+            border: none;
+            overflow: hidden;
+          }
+          #id_work_days::-moz-focus-inner {
+            border: 0;
+          }
+          #id_work_days:focus {
+            outline: none;
+          }
+          #id_work_days option{
+            width: 40px;
+            font-size: 0.8em;
+            padding: 10px 0;
+            text-align: center;
+            margin-right: 20px;
+            display: inline-block;
+            cursor: pointer;
+            border:1px solid #046963;
+            border-radius: 5px;
+            color: #088178;
+          }
+          select:active, select:hover {
+            outline-color: red
+          }
+        </style>
     {% endblock %}
     

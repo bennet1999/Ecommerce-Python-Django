@@ -3,13 +3,6 @@ from category.models import Category, Subcategory
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-SIZE_CHOICES = (
-    ("S", "S"),
-    ("M", "M"),
-    ("L", "L"),
-    ("XL", "XL"),
-    ("2XL", "2XL")
-)
 
 class Product(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -19,11 +12,13 @@ class Product(models.Model):
     image2 = models.ImageField(upload_to='images/products')
     image3 = models.ImageField(upload_to='images/products')
     image4 = models.ImageField(upload_to='images/products')
-    stock        = models.IntegerField()
     is_available = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     have_size = models.BooleanField(default=False)
-    size = models.CharField(max_length = 10,choices = SIZE_CHOICES,default = 'S')
+    nonsizestock = models.IntegerField(validators=[MinValueValidator(0)], blank=True, default=100)
+    sizestockS = models.IntegerField(validators=[MinValueValidator(0)], blank=True, default=100)
+    sizestockM = models.IntegerField(validators=[MinValueValidator(0)], blank=True, default=100)
+    sizestockL = models.IntegerField(validators=[MinValueValidator(0)], blank=True, default=100)
     category     = models.ForeignKey(Category, on_delete=models.CASCADE)
     sub_category     = models.ForeignKey(Subcategory, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add =True)
@@ -40,7 +35,7 @@ class Categoryoffer(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):   
-     return self.category.category_name    
+     return self.category.name    
 
 
 class Productoffer(models.Model):
