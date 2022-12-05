@@ -3,10 +3,13 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from userProfile.models import Account, Profile, Address
 from category.models import Category, Subcategory
+from order.models import Order, OrderProduct, Payment
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .helper import MessageHandler
 import random
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 
 
@@ -131,10 +134,15 @@ def user_logout(request):
 def user_profile(request):
     currentuser = request.user
     user = Account.objects.get(email=currentuser)
+
     addresses = Address.objects.filter(user=user)
+
     hcategory = Category.objects.order_by('name')
     hsub_category = Subcategory.objects.order_by('name')
-    context = {'category':hcategory,'sub_category':hsub_category,'user':user,'addresses':addresses}
+
+    orders = Order.objects.filter(user=user).order_by('-id')
+
+    context = {'category':hcategory,'sub_category':hsub_category,'user':user,'addresses':addresses,'orders':orders}
     return render(request, 'user/user-profile.html', context)
 
 
@@ -151,7 +159,7 @@ def user_add_address(request):
             state = request.POST['state']
             pincode = request.POST['pincode']
             type = request.POST.get('type')
-
+            
             currentuser = request.user
             user = Account.objects.get(email=currentuser)
 
@@ -160,6 +168,24 @@ def user_add_address(request):
 
             return redirect('user_profile')
 
+def user_edit_address(request,id):
+    if request.method == 'POST':
+
+        addressObj = Address.objects.get(id=id)
+
+        addressObj.first_name = request.POST['first_name']
+        addressObj.last_name = request.POST['last_name']
+        addressObj.phone_number = request.POST['phone_number']
+        addressObj.email = request.POST['email']
+        addressObj.address = request.POST['address']
+        addressObj.town = request.POST['town']
+        addressObj.state = request.POST['state']
+        addressObj.pincode = request.POST['pincode']
+        addressObj.type = request.POST.get('type')
+
+        addressObj.save()
+
+        return redirect('user_profile')
 
 def user_delete_address(request,id):
 
@@ -167,3 +193,40 @@ def user_delete_address(request,id):
     addressObj.delete()
 
     return redirect('user_profile')
+
+def user_order_details(request,id):
+    hcategory = Category.objects.order_by('name')
+    hsub_category = Subcategory.objects.order_by('name')
+
+    order = Order.objects.get(id=id)
+
+    order_items = OrderProduct.objects.filter(order=order)
+
+
+    context = {'category':hcategory,'sub_category':hsub_category,'order':order,'order_items':order_items}
+    return render(request,'user/user-order-details.html',context)
+
+
+def user_order_cancel_return(request):
+    if request.method =='POST':
+        
+        id = request.POST['order_id']
+        order = Order.objects.get(id=id)
+        
+        roc = request.POST['roc']
+        if roc == 'return':
+            order.reason = request.POST['reasonReturn']
+            order.status = 'Returned'
+        elif roc == 'cancel':
+            order.reason = request.POST['reasonCancel']
+            order.status = 'Cancelled'
+        
+        order.save()
+        
+    return HttpResponseRedirect(reverse('user_order_details', kwargs={'id': id}))
+
+def invoice(request):
+    order = Order.objects.get(id=115)
+    order_items = OrderProduct.objects.filter(order=order)
+    context = {'order':order,'order_items':order_items}
+    return render(request,'pdf/user_invoice.html',context)

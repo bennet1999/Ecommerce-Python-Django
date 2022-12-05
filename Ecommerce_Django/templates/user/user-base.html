@@ -17,7 +17,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static "user/assets/imgs/theme/favicon.svg"%}">
     <!-- Template CSS -->
     <link rel="stylesheet" href="{% static "user/assets/css/main.css"%}">
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 
@@ -67,11 +67,11 @@
                                         <a class="active" href="{% url 'index' %}">Home</a>
                                     </li>
                                     {% for c in category %}
-                                    <li><a href="{% url 'product_list' c.name 'None' %}">{{c.name}}<i class="fi-rs-angle-down"></i></a>
+                                    <li><a href="{% url 'product_list' c.name 'None' 'relevance' %}">{{c.name}}<i class="fi-rs-angle-down"></i></a>
                                         <ul class="sub-menu">
                                             {% for sc in sub_category %}
                                             {% if sc.category|stringformat:'s' == c.name|stringformat:'s' %}
-                                            <li><a href="{% url 'product_list' c.name sc.name %}">{{sc.name}}</a></li>
+                                            <li><a href="{% url 'product_list' c.name sc.name 'relevance' %}">{{sc.name}}</a></li>
                                             {% endif %}
                                             {% endfor %}
                                         </ul>
@@ -142,11 +142,11 @@
                             </li>
                             {% for c in category %}
                             <li class="menu-item-has-children"><span class="menu-expand"></span><a
-                                    href="{% url 'product_list' c.name 'None' %}">{{c.name}}</a>
+                                    href="{% url 'product_list' c.name 'None' 'relevance' %}">{{c.name}}</a>
                                 <ul class="dropdown">
                                     {% for sc in sub_category %}
                                     {% if sc.category|stringformat:'s' == c.name|stringformat:'s' %}
-                                    <li><a href="{% url 'product_list' c.name sc.name %}">{{sc.name}}</a></li>
+                                    <li><a href="{% url 'product_list' c.name sc.name 'relevance' %}">{{sc.name}}</a></li>
                                     {% endif %}
                                     {% endfor %}
                                 </ul>

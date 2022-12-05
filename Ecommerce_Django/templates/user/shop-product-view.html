@@ -77,14 +77,40 @@
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                                         <div class="detail-extralink mb-30">
                                             <div class="detail-qty border radius">
-                                                <a class="qty-down"><i class="fi-rs-angle-small-down"></i></a>
+                                                <a style="bottom: 0;" onclick="quantityLimitDown()"><i class="fi-rs-angle-small-down"></i></a>
                                                 <span class="qty-val" id="spanQuantity">1</span>
-                                                <a class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
+                                                <a style="top: 0;" onclick="quantityLimitUp()"><i class="fi-rs-angle-small-up"></i></a>
                                                 <input id="itemQuantity" type="hidden"  name="quantity"></input>
                                             </div>
                                             <script>
                                                 function copy(){
                                                     document.getElementById("itemQuantity").value = document.getElementById("spanQuantity").innerHTML;
+                                                }
+
+                                                function quantityLimitUp(){
+                                                    var limit = parseInt(document.getElementById("spanQuantity").innerHTML);
+                                                    var span = document.getElementById('spanQuantity');
+                                                    if (limit >= 10) {
+                                                        console.log(limit);
+                                                            span.innerHTML = '10';
+                                                    }
+                                                    else{
+                                                        limit = limit+1;
+                                                        span.innerHTML = limit.toString();
+                                                    }
+                                                }
+
+                                                function quantityLimitDown(){
+                                                    var limit = parseInt(document.getElementById("spanQuantity").innerHTML);
+                                                    var span = document.getElementById('spanQuantity');
+                                                    if (limit <= 1) {
+                                                        console.log(limit);
+                                                            span.innerHTML = '1';
+                                                    }
+                                                    else{
+                                                        limit = limit-1;
+                                                        span.innerHTML = limit.toString();
+                                                    }
                                                 }
                                             </script>
                                             <div class="product-extra-link2">
@@ -92,6 +118,15 @@
                                             </div>
                                         </div>
                                         </form>
+                                        {% if messages %}
+                                        <div class="messages row justify-content-start text-center mt-10">
+                                        {% for message in messages %}
+                                        <div class="alert alert-info {{ message.tags }} col-12" role="alert">
+                                        {{ message }}
+                                        </div>
+                                        {% endfor %}
+                                        </div>
+                                        {% endif %}
                                         <ul class="product-meta font-xs color-grey mt-0">
                                             <li>Availability:<span class="in-stock text-success ml-5">{{product.stock}} Items In
                                                     Stock</span></li>

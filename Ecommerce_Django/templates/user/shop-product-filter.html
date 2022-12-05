@@ -18,85 +18,36 @@
                             <i class="fi-rs-angle-small-up angle-down"></i>
                         </a>
                         <div class="shop-product-fillter-header collapse">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-4 mb-lg-0 mb-md-5 mb-sm-5">
-                                    <h5 class="mb-20">Categories</h5>
+                            <div class="row justify-content-center">
+                                {% for c in category %}
+                                <div class="col-lg-2 col-md-4 mb-lg-0 mb-md-5 mb-sm-5">
+                                    <a href="{% url 'product_list' c.name 'None' 'relevance' %}"><h5 class="mb-20">{{c.name}}</h5></a>
                                     <ul class="categor-list">
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">Belts</a>(25)
+                                        {% for sc in sub_category %}
+                                        {% if sc.category|stringformat:'s' == c.name|stringformat:'s' %}
+                                        <li class="cat-item text-muted"><a href="{% url 'product_list' c.name sc.name 'relevance' %}">{{sc.name}}</a>
                                         </li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">Sling
-                                                Bags</a>(45)</li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">Baseball
-                                                Caps</a>(35)</li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">Snapback
-                                                Caps</a>(25)</li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">Eye
-                                                Glasses</a>(55)</li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">Sun
-                                                Glasses</a>(68)</li>
-                                        <li class="cat-item text-muted"><a
-                                                href="shop-grid-right.html">Sweatshirts</a>(25)</li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">Jackets</a>(60)
-                                        </li>
+                                        {% endif %}
+                                        {% endfor %}
                                     </ul>
                                 </div>
-                                <div class="col-lg-3 col-md-4 mb-lg-0 mb-md-5 mb-sm-5">
-                                    <h5 class="mb-20">Price range</h5>
+                                {% endfor %}
+                                <div class="col-lg-2 col-md-4 mb-lg-0 mb-md-5 mb-sm-5">
+                                    <a ><h5 class="mb-20">Sort By</h5></a>
                                     <ul class="categor-list">
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">All</a></li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">₹0.00 - ₹20.00
-                                            </a></li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">₹20.00 - ₹40.00
-                                            </a></li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">₹40.00 - ₹60.00
-                                            </a></li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">₹60.00 - ₹80.00
-                                            </a></li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">₹80.00 - ₹100.00
-                                            </a></li>
-                                        <li class="cat-item text-muted"><a href="shop-grid-right.html">₹100.00 - ₹200.00
-                                            </a></li>
-                                    </ul>
-                                </div>
-                                <div class="col-lg-3 col-md-4 mb-lg-0 mb-md-5 mb-sm-5">
-                                    <h5 class="mb-15">By Size</h5>
-                                    <ul class="list-filter size-filter font-small">
-                                        <li><a href="#">S</a></li>
-                                        <li class="active"><a href="#">M</a></li>
-                                        <li><a href="#">L</a></li>
-                                        <li><a href="#">XL</a></li>
-                                        <li><a href="#">XXL</a></li>
+                                        
+                                        <li class="cat-item text-muted"><a href="{% url 'product_list' currentCat currentSubcat 'relevance' %}">Relevance</a></li>
+                                        <li class="cat-item text-muted"><a href="{% url 'product_list' currentCat currentSubcat 'relevance' %}">Discounts</a></li>
+                                        <li class="cat-item text-muted"><a href="{% url 'product_list' currentCat currentSubcat 'newest' %}">Newest Arrivals</a></li>
+                                        <li class="cat-item text-muted"><a href="{% url 'product_list' currentCat currentSubcat 'lowtohigh' %}">Price : Low to High</a></li>
+                                        <li class="cat-item text-muted"><a href="{% url 'product_list' currentCat currentSubcat 'hightolow' %}">Price : High to Low</a></li>
+                                        
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-12">
-                        <div class="shop-product-fillter">
-                            
-                            <div class="sort-by-product-area">
-
-                                <div class="sort-by-cover">
-                                    <div class="sort-by-product-wrap">
-                                        <div class="sort-by">
-                                            <span><i class="fi-rs-apps-sort"></i>Sort by:</span>
-                                        </div>
-                                        <div class="sort-by-dropdown-wrap">
-                                            <span> Featured <i class="fi-rs-angle-small-down"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="sort-by-dropdown">
-                                        <ul>
-                                            <li><a class="active" href="#">Featured</a></li>
-                                            <li><a href="#">Price: Low to High</a></li>
-                                            <li><a href="#">Price: High to Low</a></li>
-                                            <li><a href="#">Release Date</a></li>
-                                            <li><a href="#">Avg. Rating</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="row product-grid-3">
                             {% for i in products %}
                             <div class="col-lg-4 col-md-4">
@@ -135,13 +86,15 @@
                             <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
                                 <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-start">
-                                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">02</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">03</a></li>
+                                        {% if products.has_previous %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}"><i class="fi-rs-angle-double-small-left"></i></a></li>
+                                        {% endif %}
+                                        <li class="page-item active"><a class="page-link" href="#">{{ products.number }}</a></li>
+                                        {% if products.has_next %}
                                         <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">16</a></li>
-                                        <li class="page-item"><a class="page-link" href="#"><i
-                                                    class="fi-rs-angle-double-small-right"></i></a></li>
+                                        <li class="page-item"><a class="page-link" href="#">{{ products.paginator.num_pages }}</a></li>
+                                        <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}"><i class="fi-rs-angle-double-small-right"></i></a></li>
+                                        {% endif %}
                                     </ul>
                                 </nav>
                             </div>

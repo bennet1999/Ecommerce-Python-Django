@@ -24,4 +24,15 @@ urlpatterns = [
     path('admin_edit_sub_category/<int:id>', views.admin_edit_sub_category, name='admin_edit_sub_category'),
     path('admin_delete_category/<int:id>', views.admin_delete_category, name='admin_delete_category'),
     path('admin_edit_sub_category/admin_delete_sub_category/<int:id>', views.admin_delete_sub_category, name='admin_delete_sub_category'),
+
+
+    path('admin_order_list', views.admin_order_list, name='admin_order_list'),
+    path('admin_order_details/<int:id>', views.admin_order_details, name='admin_order_details'),
+    path('admin_order_change_status/<int:id>', views.admin_order_change_status, name='admin_order_change_status'),
+
+    path('admin_coupons', views.admin_coupons, name='admin_coupons'),
+    path('admin_add_coupon', views.admin_add_coupon, name='admin_add_coupon'),
+    path('admin_delete_coupon/<int:id>', views.admin_delete_coupon, name='admin_delete_coupon'),
+    path('admin_edit_coupon/<int:id>', views.admin_edit_coupon, name='admin_edit_coupon'),
+
 ]

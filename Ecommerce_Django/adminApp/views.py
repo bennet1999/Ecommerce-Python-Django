@@ -1,11 +1,18 @@
 from django.contrib import messages
 from userProfile.models import Account
+from cart.models import Coupon
 from product.models import Product, Categoryoffer, Productoffer
 from category.models import Category, Subcategory
+from order.models import Order, OrderProduct, Payment
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
-
+from django.core.paginator import Paginator
+from django.contrib.postgres.search import SearchVector
+import datetime
+from django.db.models import Sum
 
 def admin_logout(request):
     if 'admin_username' in request.session:
@@ -39,13 +46,78 @@ def admin_login(request):
 @login_required
 def admin_dashboard(request):
     currentuser = request.user
-    return render(request, 'admin/admin_dashboard.html',{'currentuser':currentuser})
+    delivered_orders = Order.objects.filter(status='Delivered')
+    order_count = Order.objects.filter(status='Delivered').count()
+    product_count = Product.objects.count()
+    category_count = Category.objects.count()
+
+    today = datetime.date.today()
+    cm_delivered_orders = Order.objects.filter(status='Delivered',date__month=today.month)
+
+    cod_sum = Order.objects.filter(status='Delivered',payment__method='COD').aggregate(Sum('total'))
+    pyp_sum = Order.objects.filter(status='Delivered',payment__method='PYP').aggregate(Sum('total'))
+    rzp_sum = Order.objects.filter(status='Delivered',payment__method='RZP').aggregate(Sum('total'))
+
+    cod_order_count = Order.objects.filter(status='Delivered',payment__method='COD').count()
+    pyp_order_count = Order.objects.filter(status='Delivered',payment__method='PYP').count()
+    rzp_order_count = Order.objects.filter(status='Delivered',payment__method='RZP').count()
+
+    category = Category.objects.all()
+
+    c_order_count ={}
+    for i in category:
+        c_order_count[i.id] = OrderProduct.objects.filter(order__status='Delivered',product__category=i).count()
+    
+
+    revenue = 0
+    for i in delivered_orders:
+        revenue += i.total
+    cm_revenue = 0
+    for i in cm_delivered_orders:
+        cm_revenue += i.total
+
+
+    context = {
+        'currentuser':currentuser,
+        'revenue':revenue,
+        'cm_revenue':cm_revenue,
+        'order_count':order_count,
+        'product_count':product_count,
+        'category_count':category_count,
+        'cod_sum':cod_sum,
+        'rzp_sum':rzp_sum,
+        'pyp_sum':pyp_sum,
+        'cod_order_count':cod_order_count,
+        'rzp_order_count':rzp_order_count,
+        'pyp_order_count':pyp_order_count,
+        'c_order_count':c_order_count,
+        }
+    return render(request, 'admin/admin_dashboard.html',context)
 
 @login_required
 def admin_user_list(request):
-    obj = Account.objects.filter(is_superuser=False, is_staff=False).order_by('id')
     currentuser = request.user
-    context = {'obj':obj,'currentuser':currentuser}
+    if request.method =='POST':
+        search = request.POST['search']
+
+        obj = Account.objects.annotate(search=SearchVector('first_name', 'last_name', 'username','email','phone_number','id'),).filter(search=search,is_superuser=False, is_staff=False).order_by('id')
+
+        paginator = Paginator(obj,20)
+        page_number = request.GET.get('page')
+        obj = paginator.get_page(page_number)
+
+        context = {'obj':obj}
+        return render(request, 'admin/admin_user_list.html', context)
+
+
+    obj = Account.objects.filter(is_superuser=False, is_staff=False).order_by('id')
+
+    paginator = Paginator(obj,5)
+    page_number = request.GET.get('page')
+    obj = paginator.get_page(page_number)
+
+
+    context = {'currentuser':currentuser,'obj':obj}
     return render(request, 'admin/admin_user_list.html', context)
 
 @login_required
@@ -68,8 +140,26 @@ def block_unblock_user(request,id):
 @login_required
 def admin_product_list(request):
     currentuser = request.user
+    if request.method =='POST':
+        search = request.POST['search']
+
+        products = Product.objects.annotate(search=SearchVector('name', 'price', 'category__name','sub_category__name'),).filter(search=search).order_by('name')
+
+        paginator = Paginator(products,20)
+        page_number = request.GET.get('page')
+        products = paginator.get_page(page_number)
+
+        context = {'currentuser':currentuser,'products':products}
+        return render(request, 'admin/admin-product-list.html', context)
+
+
     products = Product.objects.order_by('-created_date')
-    context = {'products':products,'currentuser':currentuser}
+
+    paginator = Paginator(products,5)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
+
+    context = {'currentuser':currentuser,'products':products}
     return render(request, 'admin/admin-product-list.html', context)
 
 @login_required
@@ -345,3 +435,156 @@ def admin_delete_sub_category(request,id):
     messages.success(request,"Subcategory Deleted Successfully")
     
     return redirect('admin_category_management')
+
+
+
+# -----------------------------------------------------------
+# ------------------- ORDER  MANAGEMENT ---------------------
+# -----------------------------------------------------------
+
+
+
+def admin_order_list(request):
+    currentuser = request.user
+    if request.method =='POST':
+        search = request.POST['search']
+
+        orders = Order.objects.annotate(search=SearchVector('id', 'user__first_name', 'user__last_name'),).filter(search=search).order_by('-id')
+
+        paginator = Paginator(orders,20)
+        page_number = request.GET.get('page')
+        orders = paginator.get_page(page_number)
+
+        context = {'currentuser':currentuser,'orders':orders}
+        return render(request,'admin/admin-order-list.html',context)
+
+
+    orders = Order.objects.all().order_by('-id')
+
+    paginator = Paginator(orders,8)
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+
+    context = {'currentuser':currentuser,'orders':orders}
+    return render(request,'admin/admin-order-list.html',context)
+
+
+
+def admin_order_details(request,id):
+    currentuser = request.user
+    order = Order.objects.get(id=id)
+    order_items = OrderProduct.objects.filter(order=order)
+
+    context = {'currentuser':currentuser,'order':order,'order_items':order_items}
+
+    return render(request,'admin/admin-order-details.html',context)
+
+
+def admin_order_change_status(request,id):
+
+    if request.method == 'POST':
+
+        order = Order.objects.get(id=id)
+        order.status = request.POST.get('changeStatus')
+        order.save()
+
+        messages.success(request,"Status Changed Successfully")
+        return HttpResponseRedirect(reverse('admin_order_details', kwargs={'id': id}))
+
+
+# -----------------------------------------------------------
+# ------------------- COUPON  MANAGEMENT --------------------
+# -----------------------------------------------------------
+
+@login_required
+def admin_coupons(request):
+    currentuser = request.user
+    if request.method =='POST':
+        search = request.POST['search']
+        if search == '':
+            return redirect('admin_coupons')
+
+        coupons = Coupon.objects.annotate(search=SearchVector('code','percentage'),).filter(search=search).order_by('id')    
+
+        paginator = Paginator(coupons,10)
+        page_number = request.GET.get('page')
+        coupons = paginator.get_page(page_number)
+
+        context = {'coupons':coupons}
+        return render(request, 'admin/admin-coupons.html', context)
+
+
+    coupons = Coupon.objects.order_by('id')
+
+    paginator = Paginator(coupons,10)
+    page_number = request.GET.get('page')
+    coupons = paginator.get_page(page_number)
+
+
+    context = {'currentuser':currentuser,'coupons':coupons}
+    return render(request, 'admin/admin-coupons.html', context)
+
+
+
+@login_required
+def admin_add_coupon(request):
+    currentuser = request.user
+    context = {'currentuser':currentuser}
+
+    if request.method == 'POST':
+
+            code = request.POST['code']
+            percentage = request.POST['percentage']
+
+            if not Coupon.objects.filter(code=code).exists():
+
+                coupon = Coupon(code=code, percentage=percentage)
+                coupon.save()
+
+                messages.success(request,"Coupon Added Successfully")
+                return redirect('admin_coupons')
+
+            else:
+                messages.success(request,"Coupon Code Already Exists")
+                return redirect('admin_add_coupon')
+                
+
+
+    return render(request, 'admin/admin-add-coupon.html', context)
+
+
+@login_required
+def admin_delete_coupon(request, id):
+
+    coupon = Coupon.objects.get(id=id)
+    coupon.delete()
+    messages.success(request,"Coupon Deleted Successfully")
+
+    return redirect('admin_coupons')
+
+
+@login_required
+def admin_edit_coupon(request, id):
+
+    currentuser = request.user
+    coupon = Coupon.objects.get(id=id)
+    
+    context = {'currentuser':currentuser,'coupon':coupon}
+
+    if request.method == 'POST':
+        
+        code = request.POST['code']
+        percentage = request.POST['percentage']
+
+        if not Coupon.objects.filter(code=code).exclude(code=coupon.code):
+            coupon.code = code
+            coupon.percentage = percentage
+            coupon.save()
+            messages.success(request,"Coupon Edited Successfully")
+            return redirect('admin_coupons')
+        else:
+            messages.success(request,"Coupon Name Not Available")
+            return redirect('admin_edit_coupon',coupon.id)
+
+     
+    return render(request,'admin/admin-edit-coupon.html',context)

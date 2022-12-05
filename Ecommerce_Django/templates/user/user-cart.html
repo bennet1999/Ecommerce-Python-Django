@@ -21,7 +21,7 @@
                                 <tbody>
                                     {% for i in cart_items %}
                                     <tr>
-                                        <td class="image product-thumbnail"><img src="{{ i.product.image1.url }}" alt="#"></td>
+                                        <td class="image product-thumbnail"><img src="{{ i.product.image1.url }}"></td>
                                         <td class="product-des product-name">
                                             <h5 class="product-name"><a href="{% url 'product_view' i.product.id %}">{{i.product.name}}</a></h5>
                                             {% if i.have_size %}
@@ -50,11 +50,8 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="cart-action text-end">
-                            <a class="btn "><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
-                        </div>
-                        <hr class="mb-50 mt-50">
                         <div class="row mb-50">
+                            {% if not cart.coupon_applied %}
                             <div class="col-lg-6 col-md-12">                               
                                 <div class="mb-30 mt-50">
                                     <div class="heading_s1 mb-3">
@@ -66,10 +63,10 @@
                                                 <form action="#" target="_blank">
                                                     <div class="form-row row justify-content-center">
                                                         <div class="form-group col-lg-6">
-                                                            <input class="font-medium" name="Coupon" placeholder="Enter Your Coupon">
+                                                            <input id="coupon_code" class="font-medium" name="Coupon" placeholder="Enter Coupon Code">
                                                         </div>
                                                         <div class="form-group col-lg-6">
-                                                            <button class="btn  btn-sm"><i class="fi-rs-label mr-10"></i>Apply</button>
+                                                            <a onclick="add_coupon()" class="btn  btn-sm"><i class="fi-rs-label mr-10"></i>Apply</a>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -78,6 +75,29 @@
                                     </div>
                                 </div>
                             </div>
+                            {% else %}
+                            <div class="col-lg-6 col-md-12">                               
+                                <div class="mb-30 mt-50">
+                                    <div class="heading_s1 mb-3">
+                                        <h4>Applied Coupon</h4>
+                                    </div>
+                                    <div class="total-amount">
+                                        <div class="left">
+                                            <div class="coupon">
+                                                    <div class="form-row row justify-content-start">
+                                                        <div class="alert alert-success col-lg-5 text-center" role="alert">
+                                                            {{cart.coupon.code}}
+                                                          </div>
+                                                        <div class="mt-10 col-lg-6 align-items-center">
+                                                            <a onclick="remove_coupon({{cart.id}})" class="btn  btn-sm"><i class="fi-rs-cross mr-10"></i>Remove Coupon</a>
+                                                        </div>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                             <div class="col-lg-6 col-md-12">
                                 <div class="border p-md-4 p-30 border-radius cart-totals">
                                     <div class="heading_s1 mb-3">
@@ -88,20 +108,30 @@
                                             <tbody>
                                                 <tr>
                                                     <td class="cart_total_label">Cart Subtotal</td>
-                                                    <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">₹{{cart_total}}</span></td>
+                                                    <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">&nbsp;₹{{cart_total|floatformat:2}}</span></td>
                                                 </tr>
+                                                {% if cart.coupon_applied %}
+                                                <tr>
+                                                    <td class="cart_total_label">Coupon Discount</td>
+                                                    <td class="cart_total_amount"><span style="color:#d64a42;"class="font-lg fw-900">-₹{{cart_discount|floatformat:2}}</span></strong></td>
+                                                </tr>
+                                                {% endif %}
                                                 <tr>
                                                     <td class="cart_total_label">Shipping</td>
                                                     <td class="cart_total_amount"> <i class="ti-gift mr-5"></i> Free Shipping</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="cart_total_label">Total</td>
-                                                    <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">₹{{cart_total}}</span></strong></td>
+                                                    {% if cart.coupon_applied %}
+                                                    <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand"> ₹{{cart_total_discount|floatformat:2}}</span></strong></td>
+                                                    {% else %}
+                                                    <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand"> ₹{{cart_total|floatformat:2}}</span></strong></td>
+                                                    {% endif %}
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
-                                    <a href="#" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
+                                    <a href="{% url 'user_checkout' %}" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
                                 </div>
                             </div>
                         </div>
@@ -116,6 +146,12 @@
 
         function subtract_quantity(id)
         {window.location.href = "subtract_quantity_cart_item/"+id}
+        
+        function add_coupon()
+        {window.location.href = "add_coupon/"+document.getElementById("coupon_code").value}
+        
+        function remove_coupon(id)
+        {window.location.href = "remove_coupon/"+id}
 
     </script>
     {% endblock %}

@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'userProfile',
     'category',
     'product',
-    'cart'
+    'cart',
+    'order'
 ]
 
 MIDDLEWARE = [
@@ -144,3 +145,7 @@ ACCOUNT_SID='AC47f986e3b3305451e64b2ad3bca98165'
 AUTH_TOKEN='6a3518f64062ab57aa140e8be140b028'
 COUNTRY_CODE='+91'
 TWILIO_PHONE_NUMBER='+15732943583'
+
+
+RAZOR_PAY_KEY_ID = 'rzp_test_Si1hgsb3b6rUkY'
+RAZOR_PAY_KEY_SECRET = 'vi08jVEhto20HV6SEhKNW3hQ'

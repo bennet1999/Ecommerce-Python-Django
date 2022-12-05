@@ -20,7 +20,7 @@
                             <div class="banner-text">
                                 <span>accessories</span>
                                 <h4>The best of  <br>Accessories</h4>
-                                <a href="{% url 'product_list' 'Accessories' 'None' %}">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                                <a href="{% url 'product_list' 'Accessories' 'None' 'relevance'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -30,7 +30,7 @@
                             <div class="banner-text">
                                 <span>hats & caps</span>
                                 <h4>A great collection of <br>Hats and Caps</h4>
-                                <a href="{% url 'product_list' 'Hats & Caps' 'None' %}">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                                <a href="{% url 'product_list' 'Hats & Caps' 'None' 'relevance'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                             <div class="banner-text">
                                 <span>eyewear</span>
                                 <h4>Drippiest <br>Sunglasses</h4>
-                                <a href="{% url 'product_list' 'None' 'Sun Glasses' %}">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                                <a href="{% url 'product_list' 'None' 'Sun Glasses' 'relevance'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -66,8 +66,6 @@
                                         aria-selected="false">New Arrivals</button>
                                 </li>
                             </ul>
-                            <a href="#" class="view-more d-none d-md-flex">View More<i
-                                    class="fi-rs-angle-double-small-right"></i></a>
                         </div>
                         <!--End nav-tabs-->
                         <div class="tab-content wow fadeIn animated" id="myTabContent">
@@ -93,7 +91,7 @@
                                             </div>
                                             <div class="product-content-wrap">
                                                 <div class="product-category">
-                                                    <a href="{% url 'product_list' 'None' i.sub_category %}">{{i.sub_category}}</a>
+                                                    <a href="{% url 'product_list' 'None' i.sub_category 'relevance' %}">{{i.sub_category}}</a>
                                                 </div>
                                                 <h2><a href="shop-product-right.html">{{i.name}}</a></h2>
                                                 
@@ -131,7 +129,7 @@
                                             </div>
                                             <div class="product-content-wrap">
                                                 <div class="product-category">
-                                                    <a href="{% url 'product_list' 'None' o.sub_category %}">{{o.sub_category}}</a>
+                                                    <a href="{% url 'product_list' 'None' o.sub_category 'relevance' %}">{{o.sub_category}}</a>
                                                 </div>
                                                 <h2><a href="{% url 'product_view' o.id %}">{{o.name}}</a></h2>
                                                 <div class="product-price">
