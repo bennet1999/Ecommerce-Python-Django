@@ -6,13 +6,14 @@ from category.models import Category, Subcategory
 from order.models import Order, OrderProduct, Payment
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 import datetime
 from django.db.models import Sum
+import csv
 
 def admin_logout(request):
     if 'admin_username' in request.session:
@@ -76,6 +77,14 @@ def admin_dashboard(request):
     for i in cm_delivered_orders:
         cm_revenue += i.total
 
+    monthly_revenue = {}
+    for i in range(12):
+        orders = Order.objects.filter(status="Delivered",date__month=i+1)
+        revenue = 0
+        for o in orders:
+            revenue = revenue + o.total
+        monthly_revenue[i+1] = revenue
+    
 
     context = {
         'currentuser':currentuser,
@@ -91,6 +100,7 @@ def admin_dashboard(request):
         'rzp_order_count':rzp_order_count,
         'pyp_order_count':pyp_order_count,
         'c_order_count':c_order_count,
+        'monthly_revenue':monthly_revenue,
         }
     return render(request, 'admin/admin_dashboard.html',context)
 
@@ -206,7 +216,7 @@ def admin_add_product(request):
             sub_category = request.POST.get('sub_category')   
             sub_category_instance = Subcategory.objects.get(name=sub_category)
 
-            product = Product(name=name,description=description,price=price,nonsizestock=nonsizestock,sizestockS=sizestockS,sizestockM=sizestockM,sizestockL=sizestockL,is_available=is_available,is_featured=is_featured,have_size=have_size,category=category_instance,sub_category=sub_category_instance,image1=image1,image2=image2,image3=image3,image4=image4)
+            product = Product(name=name,description=description,price=price,discount_price=price,nonsizestock=nonsizestock,sizestockS=sizestockS,sizestockM=sizestockM,sizestockL=sizestockL,is_available=is_available,is_featured=is_featured,have_size=have_size,category=category_instance,sub_category=sub_category_instance,image1=image1,image2=image2,image3=image3,image4=image4)
             product.save()
         
             messages.success(request,"Product Added Successfully")
@@ -259,7 +269,8 @@ def admin_edit_product(request,id):
             product.name = name
             product.description = description
             product.price = price
-            
+            product.discount_price = price
+
             product.nonsizestock = nonsizestock
             product.sizestockS = sizestockS
             product.sizestockM = sizestockM
@@ -588,3 +599,297 @@ def admin_edit_coupon(request, id):
 
      
     return render(request,'admin/admin-edit-coupon.html',context)
+
+
+# -----------------------------------------------------------
+# --------------------- CATEGORY OFFER ----------------------
+# -----------------------------------------------------------
+
+
+def admin_category_offers(request):
+    currentuser = request.user
+
+    if request.method =='POST':
+        search = request.POST['search']
+        if search == '':
+            return redirect('admin_category_offers')
+
+        c_offers = Categoryoffer.objects.annotate(search=SearchVector('category__name','discount'),).filter(search=search).order_by('id')    
+
+        paginator = Paginator(c_offers,10)
+        page_number = request.GET.get('page')
+        c_offers = paginator.get_page(page_number)
+
+        context = {'c_offers':c_offers}
+        return render(request, 'admin/admin-category-offers.html', context)
+
+
+    c_offers = Categoryoffer.objects.order_by('id')
+
+    paginator = Paginator(c_offers,10)
+    page_number = request.GET.get('page')
+    c_offers = paginator.get_page(page_number)
+
+
+    context = {'currentuser':currentuser,'c_offers':c_offers}
+    return render(request,'admin/admin-category-offers.html',context)
+
+
+def admin_add_category_offer(request):
+    hcategory = Category.objects.all()
+
+    if request.method == 'POST':
+
+            category = request.POST['category']
+            discount = request.POST['discount']
+
+            if Categoryoffer.objects.filter(category__name=category).exists():
+                messages.success(request,"Category Offer Alredy Exists")
+                return redirect('admin_add_category_offer')
+            
+            c_offer = Categoryoffer(category=Category.objects.get(name=category),discount=discount,is_active=True)
+            c_offer.save()
+            products = Product.objects.filter(category=Category.objects.get(name=category))
+            for i in products:
+                i.discount_price = i.discount_price - ((i.price*int(discount))/100)
+                i.save()
+            return redirect('admin_category_offers')
+
+    context = {'category':hcategory}
+    return render(request,'admin/admin-add-category-offer.html',context)
+
+
+def admin_delete_category_offer(request,id):
+
+    c_offer = Categoryoffer.objects.get(id=id)
+    products = Product.objects.filter(category=c_offer.category)
+    for i in products:
+        i.discount_price = i.discount_price + ((i.price*int(c_offer.discount))/100)
+        i.save()
+    c_offer.delete()
+    messages.success(request,"Offer Deleted Successfully")
+    return redirect('admin_category_offers')
+
+
+def admin_active_category_offer(request,id):
+    c_offer = Categoryoffer.objects.get(id=id)
+
+    if c_offer.is_active:
+        c_offer.is_active = False
+        c_offer.save()
+        products = Product.objects.filter(category=c_offer.category)
+        for i in products:
+            i.discount_price = i.discount_price + ((i.price*int(c_offer.discount))/100)
+            i.save()
+    else:
+        c_offer.is_active = True
+        products = Product.objects.filter(category=c_offer.category)
+        for i in products:
+            i.discount_price = i.discount_price - ((i.price*int(c_offer.discount))/100)
+            i.save()
+        c_offer.save()
+
+    return redirect('admin_category_offers')
+
+
+# -----------------------------------------------------------
+# --------------------- PRODUCT OFFER -----------------------
+# -----------------------------------------------------------
+
+
+def admin_product_offers(request):
+
+    currentuser = request.user
+
+    if request.method =='POST':
+        search = request.POST['search']
+        if search == '':
+            return redirect('admin_product_offers')
+
+        p_offers = Productoffer.objects.annotate(search=SearchVector('product__name','discount'),).filter(search=search).order_by('id')    
+
+        paginator = Paginator(p_offers,10)
+        page_number = request.GET.get('page')
+        p_offers = paginator.get_page(page_number)
+
+        context = {'p_offers':p_offers}
+        return render(request, 'admin/admin-product-offers.html', context)
+
+
+    p_offers = Productoffer.objects.order_by('id')
+
+    paginator = Paginator(p_offers,10)
+    page_number = request.GET.get('page')
+    p_offers = paginator.get_page(page_number)
+
+
+    context = {'currentuser':currentuser,'p_offers':p_offers}
+    return render(request,'admin/admin-product-offers.html',context)
+
+
+def admin_add_product_offer(request):
+    hproduct = Product.objects.all()
+
+    if request.method == 'POST':
+
+            product = request.POST['product']
+            discount = request.POST['discount']
+
+            if Productoffer.objects.filter(product__name=product).exists():
+                messages.success(request,"Product Offer Alredy Exists")
+                return redirect('admin_add_product_offer')
+            
+            p_offer = Productoffer(product=Product.objects.get(name=product),discount=discount,is_active=True)
+            product = Product.objects.get(name=p_offer.product.name)
+            product.discount_price = product.discount_price - ((product.price*int(discount))/100)
+            product.save()
+            p_offer.save()
+            return redirect('admin_product_offers')
+
+    context = {'product':hproduct}
+    return render(request,'admin/admin-add-product-offer.html',context)
+
+
+def admin_delete_product_offer(request,id):
+
+    p_offer = Productoffer.objects.get(id=id)
+    product = Product.objects.get(name=p_offer.product.name)
+    product.discount_price = product.discount_price + ((product.price*int(p_offer.discount))/100)
+    product.save()
+    p_offer.delete()
+    messages.success(request,"Offer Deleted Successfully")
+    return redirect('admin_product_offers')
+
+
+def admin_active_product_offer(request,id):
+    p_offer = Productoffer.objects.get(id=id)
+
+    if p_offer.is_active:
+        p_offer.is_active = False
+        product = Product.objects.get(name=p_offer.product.name)
+        product.discount_price = product.discount_price + ((product.price*int(p_offer.discount))/100)
+        product.save()
+        p_offer.save()
+    else:
+        p_offer.is_active = True
+        product = Product.objects.get(name=p_offer.product.name)
+        product.discount_price = product.discount_price - ((product.price*int(p_offer.discount))/100)
+        product.save()
+        p_offer.save()
+        
+    return redirect('admin_product_offers')
+
+
+
+def admin_sales_report(request):
+
+    if request.method == 'POST':
+        startDate = request.POST.get('startDate')
+        endDate = request.POST.get('endDate')
+        orders = Order.objects.filter(date__range=[startDate,endDate]).order_by("-id")
+        
+        currentuser = request.user
+        paginator = Paginator(orders,10)
+        page_number = request.GET.get('page')
+        orders = paginator.get_page(page_number)
+
+        context = { 'currentuser':currentuser,
+                'orders':orders,
+                'startDate':startDate,
+                'endDate':endDate
+              }
+        return render(request,'admin/admin-sales-report.html',context)
+
+    currentuser = request.user
+
+    orders = Order.objects.filter().order_by("-id")
+
+
+    earliest = Order.objects.order_by('date')[0]
+    startDate = earliest.date.strftime ("%Y-%m-%d")
+    endDate = datetime.datetime.now().strftime ("%Y-%m-%d")
+
+    paginator = Paginator(orders,10)
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+
+    context = { 'currentuser':currentuser,
+                'orders':orders,
+                'startDate':startDate,
+                'endDate':endDate,  
+              }
+    return render(request,'admin/admin-sales-report.html',context)
+
+
+def admin_export_sales_reportCSV(request,startDate,endDate):
+    salesreport = Order.objects.filter(date__range = [startDate,endDate]).order_by("-id")
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sales report.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Order Id', 'Billing Name', 'Email', 'Total', 'Payment Status', 'Payment Method', 'Date'])
+    for ob in salesreport:
+        datestr = str(ob.date)
+        writer.writerow([ob.id, ob.user.first_name+' '+ob.user.last_name, ob.user.email, ob.total, ob.payment.status, ob.payment.method, datestr])
+    return response
+
+
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+#---------------- PDF SALES REPORT GENERATION -------------------
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+
+
+from io import BytesIO
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+import os
+from django.contrib.staticfiles import finders
+from django.conf import settings
+
+def link_callback(uri, rel):
+    result = finders.find(uri)
+    if result:
+        if not isinstance(result, (list, tuple)):
+                result = [result]
+        result = list(os.path.realpath(path) for path in result)
+        path=result[0]
+    else:
+        sUrl = settings.STATIC_URL        # Typically /static/
+        sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
+        mUrl = settings.MEDIA_URL         # Typically /media/
+        mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
+        if uri.startswith(mUrl):
+            path = os.path.join(mRoot, uri.replace(mUrl, ""))
+        elif uri.startswith(sUrl):
+            path = os.path.join(sRoot, uri.replace(sUrl, ""))
+        else:
+            return uri
+    if not os.path.isfile(path):
+            raise Exception(
+                'media URI must start with %s or %s' % (sUrl, mUrl)
+            )
+    return path
+
+
+def render_to_pdf(template_src, context={}):
+    template = get_template(template_src)
+    html =  template.render(context)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def admin_export_sales_reportPDF(request,startDate,endDate):
+
+    orders = Order.objects.filter(date__range=[startDate,endDate]).order_by("-id")
+
+    data = {
+        'orders':orders
+    }
+
+    pdf = render_to_pdf('pdf/sales_report.html',data)
+    return pdf

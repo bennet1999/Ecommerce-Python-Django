@@ -10,7 +10,11 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-25">
+                            {% if request.session.email == 'guest@gmail.com' %}
+                            <h4>Enter Address</h4>
+                            {% else %}
                             <h4>Select Address</h4>
+                            {% endif %}
                         </div>
                         <div class="row">
                             {% for a in addresses %}
@@ -33,6 +37,7 @@
                             {% endfor %}
                         </div>
                         <div class="ship_detail">
+                            {% if not request.session.email == 'guest@gmail.com' %}
                             <div class="form-group">
                                 <div class="chek-form">
                                     <div class="custome-checkbox">
@@ -45,8 +50,14 @@
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
+                            {% if request.session.email == 'guest@gmail.com' %}
+                            <div style="display:block;" class="row justify-content-center card mt-40"
+                            id="diffAddressForm" disabled>
+                            {% else %}
                             <div style="display:none;" class="row justify-content-center card mt-40"
-                                id="diffAddressForm" disabled>
+                            id="diffAddressForm" disabled>
+                            {% endif %}
                                 <div class="col-12 card-body">
                                     <div class="row">
                                         <div class="form-group col-md-6">
@@ -158,6 +169,7 @@
                                 </table>
                             </div>
                             <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                            <div id="payment_section" hidden>
                             <div class="payment_method">
                                 <div class="mb-25">
                                     <h5>Payment</h5>
@@ -188,6 +200,7 @@
                                 <button style="display:none;" id="cod-button1" type="submit" class="btn btn-primary btn-sm rounded">Place Order</button>
                                 <div style="display:none;" id="paypal-button-container"></div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -221,6 +234,9 @@
   </script>
 <script>
     function selectDiffAddress() {
+        if(document.getElementById('payment_section').hidden == true){
+            document.getElementById('payment_section').removeAttribute("hidden")
+        }
         if (document.getElementById('differentaddress').checked) {
             document.getElementById("diffAddressForm").style.display = "block";
             var elements = document.getElementsByClassName('addressRadio');
@@ -234,6 +250,9 @@
     }
 
     function closeDiffAddressForm() {
+        if(document.getElementById('payment_section').hidden == true){
+            document.getElementById('payment_section').removeAttribute("hidden")
+        }
         document.getElementById("diffAddressForm").style.display = "none";
         document.getElementById('differentaddress').checked = false;
     }

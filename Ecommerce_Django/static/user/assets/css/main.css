@@ -212,6 +212,8 @@ a:hover {
   height: 100vh !important;
 }
 
+
+
 *:focus,
 select:focus,
 .custom-select:focus,
@@ -9923,4 +9925,3 @@ span.fi-rs-apps {
 }
 .zoomContainer{ z-index: 9999;}
 .zoomWindow{ z-index: 9999;}
-/*# sourceMappingURL=main.css.map */

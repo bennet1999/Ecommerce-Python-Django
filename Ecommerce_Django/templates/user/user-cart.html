@@ -28,7 +28,7 @@
                                             <p class="font-xs"><strong>Size : </strong>{{ i.size }}</p>
                                             {% endif %}
                                         </td>
-                                        <td class="price" data-title="Price"><span>₹{{ i.product.price }}</span></td>
+                                        <td class="price" data-title="Price"><span>₹{{ i.product.discount_price }}</span></td>
                                         <td class="text-center" data-title="Stock">
                                             <div class="detail-qty border radius  m-auto">
                                                 <a onclick="subtract_quantity({{i.id}})" class="qty-down"><i class="fi-rs-angle-small-down"></i></a>
@@ -131,13 +131,26 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    {% if cart_total == 0 %}
+                                    <a class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
+                                    {% else %}
                                     <a href="{% url 'user_checkout' %}" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {% if messages %}
+            <div class="messages row justify-content-center text-center mt-10">
+            {% for message in messages %}
+            <div class="alert alert-info {{ message.tags }} col-6" role="alert">
+            {{ message }}
+            </div>
+            {% endfor %}
+            </div>
+            {% endif %}
         </section>
     </main>
     <script>
@@ -148,7 +161,14 @@
         {window.location.href = "subtract_quantity_cart_item/"+id}
         
         function add_coupon()
-        {window.location.href = "add_coupon/"+document.getElementById("coupon_code").value}
+        {   
+            const coupon_code = document.getElementById("coupon_code").value
+            if (coupon_code == ""){
+                window.location.href = "add_coupon/"+"null"
+            }else{
+                window.location.href = "add_coupon/"+coupon_code
+            }
+        }
         
         function remove_coupon(id)
         {window.location.href = "remove_coupon/"+id}

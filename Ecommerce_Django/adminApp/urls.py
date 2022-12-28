@@ -35,4 +35,17 @@ urlpatterns = [
     path('admin_delete_coupon/<int:id>', views.admin_delete_coupon, name='admin_delete_coupon'),
     path('admin_edit_coupon/<int:id>', views.admin_edit_coupon, name='admin_edit_coupon'),
 
+    path('admin_category_offers', views.admin_category_offers, name='admin_category_offers'),
+    path('admin_add_category_offer', views.admin_add_category_offer, name='admin_add_category_offer'),
+    path('admin_delete_category_offer/<int:id>', views.admin_delete_category_offer, name='admin_delete_category_offer'),
+    path('admin_active_category_offer/<int:id>', views.admin_active_category_offer, name='admin_active_category_offer'),
+
+    path('admin_product_offers', views.admin_product_offers, name='admin_product_offers'),
+    path('admin_add_product_offer', views.admin_add_product_offer, name='admin_add_product_offer'),
+    path('admin_delete_product_offer/<int:id>', views.admin_delete_product_offer, name='admin_delete_product_offer'),
+    path('admin_active_product_offer/<int:id>', views.admin_active_product_offer, name='admin_active_product_offer'),
+ 
+    path('admin_sales_report', views.admin_sales_report, name='admin_sales_report'),
+    path('admin_export_sales_reportCSV/<str:startDate>/<str:endDate>', views.admin_export_sales_reportCSV, name='admin_export_sales_reportCSV'),
+    path('admin_export_sales_reportPDF/<str:startDate>/<str:endDate>', views.admin_export_sales_reportPDF, name='admin_export_sales_reportPDF'),
 ]

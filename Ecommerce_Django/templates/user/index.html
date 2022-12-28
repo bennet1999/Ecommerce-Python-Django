@@ -8,8 +8,6 @@
                 <img class="animated" src="{% static "user/assets/imgs/slider/slider-6.png"%}" >
                 </a>
             </div>
-
-            </div>
         </section>
         <section class="banners mb-20">
             <div class="container">
@@ -20,7 +18,7 @@
                             <div class="banner-text">
                                 <span>accessories</span>
                                 <h4>The best of  <br>Accessories</h4>
-                                <a href="{% url 'product_list' 'Accessories' 'None' 'relevance'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                                <a href="{% url 'product_list' 'Accessories' 'None' 'relevance' '0' '10000'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -30,7 +28,7 @@
                             <div class="banner-text">
                                 <span>hats & caps</span>
                                 <h4>A great collection of <br>Hats and Caps</h4>
-                                <a href="{% url 'product_list' 'Hats & Caps' 'None' 'relevance'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                                <a href="{% url 'product_list' 'Hats & Caps' 'None' 'relevance' '0' '10000'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -40,7 +38,7 @@
                             <div class="banner-text">
                                 <span>eyewear</span>
                                 <h4>Drippiest <br>Sunglasses</h4>
-                                <a href="{% url 'product_list' 'None' 'Sun Glasses' 'relevance'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                                <a href="{% url 'product_list' 'None' 'Sun Glasses' 'relevance' '0' '10000'%}">Shop Now <i class="fi-rs-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -83,21 +81,18 @@
                                                         <img class="hover-img" src="{{ i.image2.url }}">
                                                     </a>
                                                 </div>
-                                                <div class="product-action-1">
-                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                        href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                                </div>
-                                                
                                             </div>
                                             <div class="product-content-wrap">
                                                 <div class="product-category">
-                                                    <a href="{% url 'product_list' 'None' i.sub_category 'relevance' %}">{{i.sub_category}}</a>
+                                                    <a href="{% url 'product_list' 'None' i.sub_category 'relevance' '0' '10000'%}">{{i.sub_category}}</a>
                                                 </div>
                                                 <h2><a href="shop-product-right.html">{{i.name}}</a></h2>
                                                 
                                                 <div class="product-price">
-                                                    <span>₹{{i.price}}</span>
-                                                    <!--<span class="old-price">$245.8</span>-->
+                                                    <span>₹{{i.discount_price}}</span>
+                                                    {% if i.discount_price < i.price %}
+                                                    <span class="old-price">₹{{i.price}}</span>
+                                                    {% endif %}
                                                 </div>
                                                 
                                             </div>
@@ -122,21 +117,18 @@
                                                         <img class="hover-img" src="{{ o.image2.url }}">
                                                     </a>
                                                 </div>
-                                                <div class="product-action-1">
-                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                        href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                                </div>
                                             </div>
                                             <div class="product-content-wrap">
                                                 <div class="product-category">
-                                                    <a href="{% url 'product_list' 'None' o.sub_category 'relevance' %}">{{o.sub_category}}</a>
+                                                    <a href="{% url 'product_list' 'None' o.sub_category 'relevance' '0' '10000'%}">{{o.sub_category}}</a>
                                                 </div>
                                                 <h2><a href="{% url 'product_view' o.id %}">{{o.name}}</a></h2>
                                                 <div class="product-price">
-                                                    <span>₹{{o.price}}</span>
-                                                    <!--<span class="old-price">$245.8</span>-->
+                                                    <span>₹{{o.discount_price}}</span>
+                                                    {% if o.discount_price < o.price %}
+                                                    <span class="old-price">₹{{o.price}}</span>
+                                                    {% endif %}
                                                 </div>
-                                                
                                             </div>
                                         </div>
                                     </div>

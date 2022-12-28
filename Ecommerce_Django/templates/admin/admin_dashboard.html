@@ -85,6 +85,14 @@
                 </article>
             </div>
         </div>
+        <div class="col-xl-12 col-lg-12">
+            <div class="card mb-4">
+                <article class="card-body">
+                    <h5 class="card-title">All Time Revenue Per Month </h5>
+                    <canvas id="myChart6" height="124px"></canvas>
+                </article>
+            </div>
+        </div>
         <div class="col-xl-5 col-lg-12">
             <div class="card mb-4">
                 <article class="card-body">
@@ -261,6 +269,65 @@
                 '#9900F0',
                 '#F900BF',
                 '#FF85B3',
+                ],
+                borderWidth: 1,
+                borderColor: '#FBFACD',
+                hoverBorderWidth: 1,
+                hoverBorderColor: '#497174'
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: '',
+                fontSize: 25
+            },
+            legend: {
+                display: true,
+                position: 'right',
+                labels: {
+                    fontColor: '#000'
+                }
+            },
+            layout: {
+                padding: {
+                    left: 50,
+                    right: 0,
+                    bottom: 0,
+                    top: 0
+                }
+            },
+            tooltips: {
+                enabled: true
+            }
+        }
+    });
+</script>
+
+<script>
+    var ctx = document.getElementById('myChart6').getContext('2d');
+    var myChart6 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['January', 'Febuary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            datasets: [{
+                label: 'Revenue Per Month',
+                data: ['{{monthly_revenue.1}}', '{{monthly_revenue.2}}', '{{monthly_revenue.3}}', '{{monthly_revenue.4}}', '{{monthly_revenue.5}}', '{{monthly_revenue.6}}', '{{monthly_revenue.7}}', '{{monthly_revenue.8}}','{{monthly_revenue.9}}', '{{monthly_revenue.10}}', '{{monthly_revenue.11}}', '{{monthly_revenue.12}}'],
+
+                //backgroundColor:'green',
+                backgroundColor: [
+                '#FFE15D',
+                '#F49D1A',
+                '#DC3535',
+                '#FFE15D',
+                '#F49D1A',
+                '#DC3535',
+                '#FFE15D',
+                '#F49D1A',
+                '#DC3535',
+                '#FFE15D',
+                '#F49D1A',
+                '#DC3535',
                 ],
                 borderWidth: 1,
                 borderColor: '#FBFACD',

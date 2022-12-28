@@ -8,18 +8,19 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .helper import MessageHandler
 import random
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 
 
 
 
 def user_login(request):
-    if 'email' in request.session:
+    if 'email' in request.session and request.session['email']!='guest@gmail.com':
         #return redirect('userprofile')
         return redirect('user_profile')
     else:
         if request.method == 'POST':
+            logout(request)
             email = request.POST['email']
             password = request.POST['password']
 
@@ -128,6 +129,13 @@ def user_logout(request):
         request.session.flush()
     logout(request)
     messages.success(request, 'Logged out successfully!')
+    
+    user = authenticate(email='guest@gmail.com', password='root')
+    if user is not None:
+        login(request,user)
+        print(request.session)
+        request.session['email'] = 'guest@gmail.com'
+
     return redirect('user_login')
 
 @login_required
@@ -225,8 +233,78 @@ def user_order_cancel_return(request):
         
     return HttpResponseRedirect(reverse('user_order_details', kwargs={'id': id}))
 
-def invoice(request):
-    order = Order.objects.get(id=115)
+
+
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+#--------------------INVOICE GENERATION -------------------------
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+
+
+from io import BytesIO
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+import os
+from django.contrib.staticfiles import finders
+from django.conf import settings
+
+def link_callback(uri, rel):
+    result = finders.find(uri)
+    if result:
+        if not isinstance(result, (list, tuple)):
+                result = [result]
+        result = list(os.path.realpath(path) for path in result)
+        path=result[0]
+    else:
+        sUrl = settings.STATIC_URL        # Typically /static/
+        sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
+        mUrl = settings.MEDIA_URL         # Typically /media/
+        mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
+        if uri.startswith(mUrl):
+            path = os.path.join(mRoot, uri.replace(mUrl, ""))
+        elif uri.startswith(sUrl):
+            path = os.path.join(sRoot, uri.replace(sUrl, ""))
+        else:
+            return uri
+    if not os.path.isfile(path):
+            raise Exception(
+                'media URI must start with %s or %s' % (sUrl, mUrl)
+            )
+    return path
+
+
+def render_to_pdf(template_src, context={}):
+    template = get_template(template_src)
+    html =  template.render(context)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def invoice(request,id):
+    order = Order.objects.get(id=id)
     order_items = OrderProduct.objects.filter(order=order)
-    context = {'order':order,'order_items':order_items}
-    return render(request,'pdf/user_invoice.html',context)
+
+    data = {
+        'first_name'   : order.address.first_name,
+        'last_name'    : order.address.last_name,
+        'phone_number' : order.address.phone_number,
+        'email'        : order.address.email,
+        'address'      : order.address.address,
+        'town'         : order.address.town,
+        'state'        : order.address.state,
+        'pincode'      : order.address.pincode,
+        'order_id'     : order.id,
+        'order_date'   : str(order.date),
+        'order_items'  : order_items,
+        'order_total'  : order.total
+    }
+
+    pdf = render_to_pdf('pdf/user_invoice.html', data)
+    return pdf
+
+    

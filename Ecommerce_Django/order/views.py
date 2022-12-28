@@ -3,6 +3,7 @@ from category.models import Category, Subcategory
 from order.models import Order, OrderProduct, Payment
 from cart.models import Cart, CartItem
 from userProfile.models import Account, Address
+from product.models import Product
 
 
 def order_confirmation(request):
@@ -19,7 +20,7 @@ def order_confirmation(request):
         payment_method = request.POST.get('payment_option')
 
 
-        if shipToDiff:
+        if shipToDiff or request.session['email']=='guest@gmail.com':
             first_name = request.POST['first_name']
             last_name = request.POST['last_name']
             phone_number = request.POST['phone_number']
@@ -76,8 +77,24 @@ def order_confirmation(request):
         cart_items.delete()
 
         
-
         order_products = OrderProduct.objects.filter(order=order)
+
+        for i in order_products:
+            product = Product.objects.get(id=i.product.id)
+            if product.have_size:
+                print('. . . . . ',i.size)
+                if i.size == 'S':
+                    product.sizestockS -= i.quantity
+                    product.save()
+                elif i.size == 'M':
+                    product.sizestockM -= i.quantity
+                    product.save()
+                else:
+                    product.sizestockL -= i.quantity
+                    product.save()
+            else:
+                product.nonsizestock -= i.quantity
+                product.save()
 
         context = {'category':hcategory,'sub_category':hsub_category,'order':order,'order_products':order_products}
         return render(request,'user/order-confirmation.html',context)

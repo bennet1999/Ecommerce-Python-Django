@@ -44,9 +44,10 @@
                                         <h2 class="title-detail">{{product.name}}</h2>
                                         <div class="clearfix product-price-cover mt-10">
                                             <div class="product-price primary-color float-left">
-                                                <ins><span class="text-brand">₹{{ product.price }}</span></ins>
-                                                <!--<ins><span class="old-price font-md ml-15">$200.00</span></ins>
-                                                <span class="save-price  font-md color3 ml-15">25% Off</span>-->
+                                                <ins><span class="text-brand">₹{{ product.discount_price }}</span></ins>
+                                                {% if product.discount_price < product.price %}
+                                                <ins><span class="old-price font-md ml-15">₹{{ product.price }}</span></ins>
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="bt-1 border-color-1 mt-15 mb-15"></div>
@@ -64,18 +65,27 @@
                                         </div>
                                         <form  action="{% url 'add_to_cart' product.id %}" method="post">
                                         {% csrf_token %}
-                                        {% if product.have_size %}
+                                        {% if product.have_size and product.sizestockS == 0 and product.sizestockM == 0 and product.sizestockL == 0 %}
+                                        <div class="attr-detail attr-size" hidden>
+                                        {% elif  product.have_size %}
                                         <div class="attr-detail attr-size">
-                                            <select class="form-select" name="size">
-                                                <option disabled selected> -- select size -- </option>
+                                        {% else %}
+                                        <div class="attr-detail attr-size" hidden>
+                                        {% endif %}
+                                            <select id="select-size" class="form-select" name="size">
+                                                    <option disabled selected> -- select size -- </option>
                                                     <option>S</option>
                                                     <option>M</option>
-                                                    <option>L</option>
-                                                </select>
+                                                    <option>L</option>                                                
+                                            </select>
                                         </div>
-                                        {% endif %}
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                        <div class="detail-extralink mb-30">
+                                        
+                                        {% if not product.have_size and product.nonsizestock == 0 %}
+                                        <div id="addToCartDiv" class="detail-extralink mb-30" hidden>
+                                        {% else %}
+                                        <div id="addToCartDiv" class="detail-extralink mb-30">
+                                        {% endif %}
                                             <div class="detail-qty border radius">
                                                 <a style="bottom: 0;" onclick="quantityLimitDown()"><i class="fi-rs-angle-small-down"></i></a>
                                                 <span class="qty-val" id="spanQuantity">1</span>
@@ -114,7 +124,11 @@
                                                 }
                                             </script>
                                             <div class="product-extra-link2">
-                                                <button onclick="copy()" type="submit" class="button button-add-to-cart">Add to cart</button>
+                                                {% if product.have_size %}
+                                                <button onclick="copy()" id="submitbtn" disabled="disabled" type="submit" class="button button-add-to-cart">Add to cart</button>
+                                                {% else %}
+                                                <button onclick="copy()" id="submitbtn" type="submit" class="button button-add-to-cart">Add to cart</button>
+                                                {% endif %}
                                             </div>
                                         </div>
                                         </form>
@@ -127,10 +141,19 @@
                                         {% endfor %}
                                         </div>
                                         {% endif %}
+                                        <div id="availability">
                                         <ul class="product-meta font-xs color-grey mt-0">
-                                            <li>Availability:<span class="in-stock text-success ml-5">{{product.stock}} Items In
-                                                    Stock</span></li>
+                                        {% if not product.have_size and product.nonsizestock == 0 %}
+                                        <li>Availability:<span class="in-stock text-danger ml-5">Item Out of Stock</span></li>
+                                        {% elif not product.have_size and product.nonsizestock <= 10 %}
+                                        <li>Availability:<span class="in-stock text-danger ml-5">Only {{product.nonsizestock}} Items In Stock</span></li>
+                                        {% elif not product.have_size and product.nonsizestock != 0 %}
+                                        <li>Availability:<span class="in-stock text-success ml-5">Items In Stock</span></li>
+                                        {% elif  product.have_size and product.sizestockS == 0 and product.sizestockM == 0 and product.sizestockL == 0 %}
+                                        <li>Availability:<span class="in-stock text-danger ml-5">Items Out of Stock</span></li>
+                                        {% endif %}
                                         </ul>
+                                        </div>
                                     </div>
                                     <!-- Detail Info -->
                                     </div>
@@ -143,6 +166,65 @@
             </div>
         </section>
     </main>
+    <script>
+            const availability       = document.getElementById('availability')
+            const addToCartDiv       = document.getElementById('addToCartDiv')
+
+            $("#select-size").change(function () {
+                if ($('#submitbtn').is(':disabled')) {
+                    $('#submitbtn').removeAttr('disabled');
+                }
+                const size = $(this).val();  // get the selected subject ID from the HTML dropdown list 
+                $.ajax({                       // initialize an AJAX request
+                    type: "POST",
+                    url: '{% url "get_size_info" %}',
+                    data: {
+                        'size': size,       // add the country id to the POST parameters
+                        'id': {{product.id}},       // add the country id to the POST parameters
+                        'csrfmiddlewaretoken':$('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (sizeStock) {   // `data` is from `get_topics_ajax` view function
+                        console.log(sizeStock.sizeStock)
+                        if (sizeStock.sizeStock == 0){
+                            addToCartDiv.style.display = 'none'
+                            availability.innerHTML = ""
+                            availability.innerHTML += `
+                            <ul class="product-meta font-xs color-grey mt-0">
+                                <li>Availability:<span class="in-stock text-danger ml-5">Item Out of Stock</span></li>
+                            </ul>
+                            `
+                        } else if(sizeStock.sizeStock <= 10){
+                            addToCartDiv.style.display = 'block'
+                            availability.innerHTML = ""
+                            if(size == 'S'){
+                            availability.innerHTML += `
+                            <ul class="product-meta font-xs color-grey mt-0">
+                                <li>Availability:<span class="in-stock text-danger ml-5">Only {{product.sizestockS}} Items In Stock</span></li>
+                            </ul>
+                            `} else if(size == 'M'){
+                                availability.innerHTML += `
+                                <ul class="product-meta font-xs color-grey mt-0">
+                                    <li>Availability:<span class="in-stock text-danger ml-5">Only {{product.sizestockM}} Items In Stock</span></li>
+                                </ul>
+                            `} else if(size == 'L'){
+                                availability.innerHTML += `
+                                <ul class="product-meta font-xs color-grey mt-0">
+                                    <li>Availability:<span class="in-stock text-danger ml-5">Only {{product.sizestockL}} Items In Stock</span></li>
+                                </ul>
+                            `}
+                        } else {
+                            addToCartDiv.style.display = 'block'
+                            availability.innerHTML = ""
+                            availability.innerHTML += `
+                                <ul class="product-meta font-xs color-grey mt-0">
+                                    <li>Availability:<span class="in-stock text-success ml-5">Items In Stock</span></li>
+                                </ul>
+                            `
+                        }
+                    }
+                });
+            });
+    </script>
     <style>
         #id_work_days{
             height: 40px;
